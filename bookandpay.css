@@ -1,0 +1,172 @@
+#wait{background:url(images/loading.gif) no-repeat left; width:250px; height:31px; text-align: left; padding-left: 50px;}
+.hidden{display:none;}
+.ui-corner-all
+{
+	background:#fff;
+}
+
+.ui-widget-header{background:url(images/ui-bg_gloss-wave_35_f6a828_500x100.png) repeat-x scroll 50% 50%;}
+
+#bookandpayform{height:260px !important;}
+
+.bookandpay_div{
+padding:5px 10px;
+margin:0 0 10px 0;
+}
+.bookandpay_div h3, .bookandpay_div h4{
+margin:15px 0;
+font-size:1.0em;
+line-height:25px;
+color:#282828;
+}
+.bookandpay_div label{
+float: left;
+width: 60px;
+font-weight: normal;
+font-size: 12px;
+}
+
+.bookandpay_div input{}
+
+.bookandpay_div input, .bookandpay_div textarea, .bookandpay_div select{
+margin-bottom: 5px;
+}
+.short{
+width: 100px;
+margin-bottom: 5px;
+}
+
+.bookandpay_div textarea{
+width: 180px;
+height: 80px;
+}
+
+.boxes{
+width: 1em;
+}
+
+#submitbutton{
+
+margin-top: 5px;
+width: 80px;
+clear:both;
+}
+
+.bookandpay_div br{
+clear: left;
+}
+
+.info, .success, .warning, .error, .validation {
+    border: 1px solid;
+    margin: 5px 0px;
+    padding:5px;
+    clear:both;
+
+}
+.info, .notice{
+    color: #FFD324;
+    background-color: #FFF6BF;
+}
+.success {
+    color: #4F8A10;
+    background-color: #DFF2BF;
+}
+.warning {
+    color: #9F6000;
+    background-color: #FEEFB3;
+}
+.error {
+    color: #D8000C;
+    background-color: #FFBABA;
+}
+
+.conversation {
+    color: #ff3300;
+    background-color: #ff9900;
+}
+
+.available {
+    color: #000;
+    background-color: #DFF2BF;
+    font-size: 110%;
+}
+
+
+/*buttons*/
+
+
+
+.bookandpay_button {
+	-moz-box-shadow:inset 0px 1px 0px 0px #a4e271;
+	-webkit-box-shadow:inset 0px 1px 0px 0px #a4e271;
+	box-shadow:inset 0px 1px 0px 0px #a4e271;
+	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #89c403), color-stop(1, #77a809) );
+	background:-moz-linear-gradient( center top, #89c403 5%, #77a809 100% );
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#89c403', endColorstr='#77a809');
+	background-color:#89c403;
+	-moz-border-radius:6px;
+	-webkit-border-radius:6px;
+	border-radius:6px;
+	border:1px solid #74b807;
+	display:inline-block;
+	color:#ffffff;
+	font-family:arial;
+	font-size:15px;
+	font-weight:bold;
+	padding:6px 24px;
+	text-decoration:none;
+	text-shadow:1px 1px 0px #528009;
+
+}.bookandpay_button:hover {
+	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #77a809), color-stop(1, #89c403) );
+	background:-moz-linear-gradient( center top, #77a809 5%, #89c403 100% );
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#77a809', endColorstr='#89c403');
+	background-color:#77a809;
+}.bookandpay_button:active {
+	position:relative;
+	top:1px;
+}
+
+
+/*CSS Digg style pagination*/
+	div.pagination {
+		padding: 3px;
+		margin: 3px;
+		text-align:center;
+	}
+	
+	div.pagination a {
+		padding: 2px 5px 2px 5px;
+		margin: 2px;
+		border: 1px solid #AAAADD;
+		
+		text-decoration: none; /* no underline */
+		color: #000099;
+	}
+	div.pagination a:hover, div.digg a:active {
+		border: 1px solid #000099;
+
+		color: #000;
+	}
+	div.pagination span.current {
+		padding: 2px 5px 2px 5px;
+		margin: 2px;
+		border: 1px solid #000099;
+		
+		font-weight: bold;
+		background-color: #21759B;
+		color: #FFF;
+	}
+	div.pagination span.disabled {
+		padding: 2px 5px 2px 5px;
+		margin: 2px;
+		border: 1px solid #EEE;
+	
+		color: #DDD;
+	}
+	
+	.bptable{font-size: smaller; background: #E8E4D8; border:1px dashed #ccc;width:100%;}
+	.bpthumb{width:100px;}
+	.bplist{font-size:smaller;  display: inline;}
+	.payment{font-size: smaller; background: #fff; border:1px dashed #ccc;width:100%;}
+	.payment td{width:50%;text-align: left;}
