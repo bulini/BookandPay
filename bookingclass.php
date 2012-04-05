@@ -26,30 +26,34 @@ class booking{
 		return $request;
 	}
 	
+	
+	
+	
+	
 	function NewRequest()
 	{
 			
-
 			
-			
+			define(ICL_LANGUAGE_CODE, $_POST['lang']);
+			//echo ICL_LANGUAGE_CODE;
 			load_plugin_textdomain('bookandpay', PLUGINDIR.'/languages/'.dirname(plugin_basename(__FILE__)));
 			//print_r($_POST);
-			
+			echo ICL_LANGUAGE_CODE;
 		    global $_POST;
 			global $wpdb;
 			require_once('class.phpmailer.php');
 			include_once('class.smtp.php');
 			require_once('datetime.php');
 
-			$id_struttura=icl_object_id($_POST['post_id'],'page',true,'it');
-
-
-			//google short
-			include('google_url.php');
-		
-			$key = 'AIzaSyCG4gdxpovYfTxGMIIfPo7jGsvQzAneIXY';
-		
-			$googler = new GoogleURLAPI($key);	
+			if(function_exists(icl_object_id)):
+				$id_struttura=icl_object_id($_POST['post_id'],'page',true,'it');
+			else:
+				$id_struttura=$_POST['post_id'];
+			endif;	
+			
+			$struttura_prenotata=get_post($id_struttura);
+			$nome_struttura = $struttura_prenotata->post_title;
+			$permalink_struttura = get_permalink($id_struttura);
 		    
 			$table_name_request = $wpdb->prefix . "request";
 		    
@@ -74,6 +78,7 @@ class booking{
 						
 						//verifico se fare instant booking col plugin ON availability
 						include_once( ABSPATH . 'wp-admin/includes/plugin.php' ); 
+						
 						if(is_plugin_active('bookandpay-availability/bookandpay-availability.php')):
 				
 							require_once(ABSPATH . 'wp-content/plugins/bookandpay-availability/bookandpay-availability.php');
@@ -83,7 +88,7 @@ class booking{
 							endif;	
 							$prezzo=CalcolaPrezzo($id_struttura,$checkin,$checkout,$_POST['people']);
 							$advance=($prezzo/2);	
-							echo $prezzo;
+							//echo $prezzo;
 										
 						endif;
 							
@@ -91,10 +96,12 @@ class booking{
 							//genero stringa univoca x conferme sicure
 							$code = md5(uniqid(rand(), true));
 						
-							if($prezzo>0) { $status='instant_booking';} else { $status='pending';}
+						if(get_post_meta($id_struttura,'bookandpay_instant_booking',true)=='on') { $status='instant_booking';} else { $status='pending';}
+							
+							//if($prezzo>0) { $status='instant_booking';} else { $status='pending';}
 			 				
 			 				
-			 				$wpdb->query("INSERT INTO $table_name_request (contactname,contactsurname,email,phonenumber,post_id,post_name,post_url,post_email,people,room,room_number,checkin,checkout, notes,magic_string,created_at,payment_status,total_price,advanced_price) VALUES ('$_POST[contactname]','$_POST[contactsurname]', '$_POST[email]', '$_POST[phonenumber]', '$id_struttura','$_POST[post_name]','$_POST[post_url]','$_POST[post_email]', '$_POST[people]', '$_POST[room]','$_POST[room_number]','$checkin', '$checkout', '$_POST[notes]','$code','$now','$status','$prezzo','$advance')");
+			 				$wpdb->query("INSERT INTO $table_name_request (contactname,contactsurname,email,phonenumber,post_id,post_name,post_url,post_email,people,room,room_number,checkin,checkout, notes,magic_string,created_at,payment_status,total_price,advanced_price) VALUES ('$_POST[contactname]','$_POST[contactsurname]', '$_POST[email]', '$_POST[phonenumber]', '$id_struttura','$nome_struttura','$permalink_struttura','$_POST[post_email]', '$_POST[people]', '$_POST[room]','$_POST[room_number]','$checkin', '$checkout', '$_POST[notes]','$code','$now','$status','$prezzo','$advance')");
 			 				   
 			 			/*qui mando email*/
 						
@@ -106,14 +113,14 @@ class booking{
 		
 							$header= get_option('bookandpay_header');
 							//$messaggio= $templaterow->welcome;
-							$subject = __('struttura '.$_POST['post_name'].' n: '.substr($code,0,6)." from:", 'bookandpay').get_bloginfo('home');
+							$subject = __('struttura '.$nome_struttura.' n: '.substr($code,0,6)." from:", 'bookandpay').get_bloginfo('home');
 							$welcome.= "<h3>".$subject."</h3>";
 							$welcome.=str_replace('{NAME}',$_POST['contactname'],get_option('bookandpay_firstmail'));
 							$messaggio='<p><strong>Nome:</strong> '.$_POST['contactname'].'</p>';		
 							$messaggio.='<p><strong>Cognome:</strong> '.$_POST['contactsurname'].'</p>';
 							$email='<p><strong>Telefono:</strong> '.$_POST['phonenumber'].'</p>';
 							$email.='<p><strong>email:</strong> '.$_POST['email'].'</p>';
-							$dettagli='<p><strong>Struttura:</strong> '.$_POST['post_name'].'</p>';
+							$dettagli='<p><strong>Struttura:</strong> '.$nome_struttura.'</p>';
 							$dettagli.='<p><strong>checkin:</strong> '.$_POST['checkin'].'</p>';
 							$dettagli.='<p><strong>checkout:</strong> '.$_POST['checkout'].'</p>';
 							$dettagli.='<p><strong>people</strong> '.$_POST['people'].'</p>';
@@ -175,7 +182,8 @@ class booking{
 						
 							 $mail->AddAddress($_POST['email']);
 							
-							if($status!='instant_booking'):
+							//if($status!='instant_booking'):
+							if(get_post_meta($id_struttura,'bookandpay_instant_booking',true)!='on'):
 							
 							if($mail->Send()) : 
 								$mail->ClearAddresses();
@@ -225,14 +233,15 @@ class booking{
 							
 							endif;
 							
-							if($prezzo>0):
+							if(get_post_meta($id_struttura,'bookandpay_instant_booking',true)=='on'):
+							
 									$successo='<div id="message" class="available">
-										<p>'.__('The room you requested is available', 'bookandpay').'<br />'.__('Price', 'bookandpay').'<strong> &euro;'.$prezzo.'</strong>
+										<p>'.__('The room you requested is available', 'bookandpay').' '.__('Price', 'bookandpay').'<strong> &euro;'.$prezzo.'</strong>
 										<br />
 										
 										Per confermare subito la vostra prenotazione &egrave; necessario pagare subito ed in modalit&agrave; sicura un anticipo del 50% pari a: <strong>&euro;'.($prezzo/2).'</strong> '.$customer_instant_link.'</p></div>';
 							else:
-									$successo=__(get_option('bookandpay_mailsuccess'));
+									$successo=__(get_option('bookandpay_mailsuccess','bookandpay'));
 							endif;
 							 	die($successo);
 					

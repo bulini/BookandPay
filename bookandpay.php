@@ -2,8 +2,8 @@
 /*
 Plugin Name: BookandPay!
 Plugin URI: http://www.giuseppesurace.com/
-Description: Book and Pay 12/11/2010
-Version: 0.1
+Description: Book and Pay 05/05/2012
+Version: 0.1 beta
 Author: Giuseppe Surace
 Author URI: http://www.giuseppesurace.com
 */
@@ -96,12 +96,14 @@ jQuery(document).ready(function(){
 
 		type: "POST",
       	data: ({
+      		lang : jQuery('#lang').val(),
       		contactname : jQuery('#contactname').val(),
       		contactsurname : jQuery('#contactsurname').val(),
       		email : jQuery('#email').val(),
       		phonenumber : jQuery('#phonenumber').val(),
       		post_id : jQuery('#post_id').val(),
       		post_name : jQuery('#post_name').val(),
+       		post_id : jQuery('#room').val(),
       		post_url : jQuery('#post_url').val(),
       		post_email : jQuery('#post_email').val(),
       		people : jQuery('#people').val(),
@@ -162,7 +164,7 @@ function BookingView($content)
     if($_POST['id_request']): 
     //print_r($_POST); 
    		
-$advance=($_POST['total_price']*30)/100;
+$advance=($_POST['total_price']*50)/100;
 $now=date("Y-m-d H:i:s",time());
 		
 
@@ -584,11 +586,14 @@ if ($attachments) {
 
 
 
-function Bookingform($id='') 
+function Bookingform($id='',$lang='') 
 {
 	global $post;
 	//echo get_post_type($post->ID);
-	$id=get_the_ID();
+	if(function_exists(icl_object_id)) { $id=icl_object_id($post->ID,'page',true,'it'); } else { $id=get_the_ID(); }
+	
+	//echo $id;
+
 	if(1==1):
 		
 		//pagina di richiesta dati	
@@ -605,8 +610,9 @@ function Bookingform($id='')
 			<div class=\"bookandpay_div\" id=\"bookandpayform\">
 			
 						<form name=\"bookingform\" id=\"bookingform\">
-				
+						<input type=\"hidden\" name=\"lang\" value=\"".$lang."\" id=\"lang\" />
 						<ul id=\"bookinglist\">
+						
 							<li>
 								<label for=\"name\">".__('Name','bookandpay')."</label>
 								<input id=\"contactname\" type=\"text\" name=\"contactname\" value=\"".$_COOKIE['bookandpay_contactname']."\"/>
@@ -622,7 +628,6 @@ function Bookingform($id='')
 								<input id=\"phonenumber\" type=\"text\"value=\"".$_COOKIE['bookandpay_phonenumber']."\" name=\"phonenumber\"/><br />
 							</li>
 							<li>	
-								<input type=\"hidden\" name=\"post_id\" id=\"post_id\" value=\"".$id."\">
 								<input type=\"hidden\" name=\"post_name\" id=\"post_name\" value=\"".get_the_title($id)."\">
 								<input type=\"hidden\" name=\"post_url\" id=\"post_url\" value=\"".$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']."\">
 								<input type=\"hidden\" name=\"post_email\" id=\"post_email\" value=\"".$email."\">
@@ -649,16 +654,16 @@ function Bookingform($id='')
 						
 							//$rooms = get_post_meta($id,'bookandpay_room',TRUE);
 							$args = array(
-							    'numberposts'     => 5,
+							    'meta_key'        => 'bookandpay_enabled',
+							    'meta_value'      => 'on',
 							    'offset'          => 0,
+							    'post_type'		  => 'page',
 							    'orderby'         => 'post_date',
 							    'order'           => 'DESC',
-							    'post_type'       => 'page',
-							    'post_parent'     => 119,
 							    'post_status'     => 'publish' );
 							
 							// the_ID();
-							$current=get_post(get_the_ID());
+							$current=get_post($id);
 							//sprint_r($current);
 							$room_name=$current->post_title;
 							
@@ -672,7 +677,7 @@ function Bookingform($id='')
 								$form_aggiunta.="<option value=\"\">".__('Select','bookandpay')."</option>";
 								foreach($rooms as $room) :
 									if($room_name==$room->post_title) { $sel=" selected=\"selected\""; } else { $sel=""; }
-									$form_aggiunta.="<option value=\"".$room->post_title."\"".$sel.">".$room->post_title."</option>";
+									$form_aggiunta.="<option value=\"".$room->ID."\"".$sel.">".$room->post_title."</option>";
 								endforeach;
 								$form_aggiunta.="</select></li>";
 							else :

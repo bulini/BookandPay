@@ -118,7 +118,22 @@ function bookandpay_options()
 
 	$markup.='<div id="message" class="updated fade"><p><strong>'.__('Settings saved!', 'bookandpay').'</strong></p></div>';
 	endif;
-	$markup.='<h3>'.__('All settings are required','bookandpay').'</h3>
+	$markup.='<h3>'.__('All settings are required','bookandpay').'</h3>';
+	//which post types are booking
+	$markup.='<h3>Select where do you want the booking boxes</h3>';
+	
+	$args=array(
+  	'public'   => true
+	); 
+	$markup.='<ul>';
+	$output = 'names'; // names or objects, note names is the default
+	$operator = 'and'; // 'and' or 'or'
+	$post_types=get_post_types($args,$output,$operator); 
+  		foreach ($post_types  as $post_type ) {
+    $markup.='<li><input type="checkbox" name="bookandpay_post_type[]" value="'.$post_type.'" />'. $post_type. '</li>';
+  }
+		
+	$markup.='</ul>
 	
 <form method="post" action="'.$_SERVER[REQUEST_URI].'">
 <table class="form-table">
@@ -449,16 +464,18 @@ if($items > 0) {
 
 
 	echo'<div class="alignleft actions">
-			<form method="get" action="admin.php">
+			<form method="get">
 			<select name="status">
-				<option value="">Visualizza</option>
-				<option value="pending">Pending</option>
-				<option value="conversation">Conversation (trattativa)</option>
-				<option value="completed">Completed pagamento effettuato (OK)</option>
-				<option value="nondisponibile">Rifiutate</option>
+				<option value="">'.__('View','bookandpay').'</option>
+				<option value="pending">'.__('Pending','bookandpay').'</option>
+				<option value="conversation">'.__('Conversation','bookandpay').'</option>
+				<option value="completed">'.__('Payment OK','bookandpay').'</option>
+				<option value="nondisponibile">'.__('Rejected','bookandpay').'</option>
+				<option value="booked_by_owner">'.__('Owner private booking','bookandpay').'</option>
+
 			</select>
 		<input type="hidden" name="page" value="Requests" />
-		<input type="submit" class="button-secondary" value="Filtra" id="post-query-submit"/>
+		<input type="submit" class="button-secondary" value="'.__('Filter results','bookandpay').'" id="post-query-submit"/>
 		</form>
 		</div>';
 	echo '<div class="alignright actions">';
@@ -498,16 +515,19 @@ echo '<div class="clear"/>
 		$tot_booking +=$request->total_price;
     		//coloro le input per distinguere tra chi ha confermato e chi no
     		if ($request->payment_status=='pending') { $style='class="notice"'; } 
+    		elseif ($request->payment_status=='instant_booking') { $style='class="instant"'; }
     		elseif ($request->payment_status=='Completed') { $style='class="success"'; }
     		elseif ($request->payment_status=='conversation') { $style='class="conversation"'; }
     		elseif ($request->payment_status=='nondisponibile') { $style='class="error"'; }
-    		
+     		elseif ($request->payment_status=='booked_by_owner') { $style='class="owner"'; }
+ 
+    		 	
     		else { $style="class=\"notice\""; }
     			//print_r($request);	
     			
     	echo '<tr>
 		    	<td '.$style.'><a href="javascript:Void();" class="row-title button-'.$request->id_request.'">'.$request->id_request.' / '.substr($request->magic_string,0,6).'</a></td>
-				<td>'.date("d/m/Y H:i:s",strtotime($request->created_at)).'</td>
+				<td>'.date("d/m/Y H:i:s",strtotime($request->created_at)).' - '.$request->payment_status.'</td>
 				<td>'.$request->post_name.'</td>
 				<td>'.$request->contactname.'</td>
 				<td>'.$request->email.'</td>
@@ -634,28 +654,28 @@ add_action('save_post', 'bookandpay_save_postdata');
 function bookandpay_add_custom_box() {
 
   if( function_exists( 'add_meta_box' )) {
-    add_meta_box( 'bookandpay_email', __( 'Owner email', 'bookandpay_textdomain' ), 
+    add_meta_box( 'bookandpay_email', __( 'Booking Single Settings', 'bookandpay' ), 
                 'bookandpay_inner_custom_box', 'post', 'side','high' );
-	add_meta_box( 'bookandpay_email', __( 'Owner email', 'bookandpay_textdomain' ), 
+	add_meta_box( 'bookandpay_email', __( 'Booking Single Settings', 'bookandpay' ), 
 		                'bookandpay_inner_custom_box', 'page', 'side','high' );
-	add_meta_box( 'bookandpay_email', __( 'Owner email', 'bookandpay_textdomain' ), 
+	add_meta_box( 'bookandpay_email', __( 'Booking Single Settings', 'bookandpay' ), 
 		                'bookandpay_inner_custom_box', 'accommodations', 'side','high' );		                
-	add_meta_box( 'bookandpay_email', __( 'Owner email', 'bookandpay_textdomain' ), 
+	add_meta_box( 'bookandpay_email', __( 'Booking Single Settings', 'bookandpay' ), 
 		                'bookandpay_inner_custom_box', 'italy', 'side','high' );
-	//add_meta_box( 'bookandpay_sectionid', __( 'email struttura', 'bookandpay_textdomain' ),'bookandpay_inner_custom_box', 'post', 'advanced','high' );
+	//add_meta_box( 'bookandpay_sectionid', __( 'email struttura', 'bookandpay' ),'bookandpay_inner_custom_box', 'post', 'advanced','high' );
 
-    add_meta_box( 'bookandpay_room', __( 'Rooms / apt type or name es (double,triple,single separated by comma)', 'bookandpay_textdomain' ), 
+    add_meta_box( 'bookandpay_room', __( 'Rooms / apt type or name es (double,triple,single separated by comma)', 'bookandpay' ), 
                 'bookandpay_inner_room_box', 'post', 'normal','high' );
     
-	add_meta_box( 'bookandpay_room', __( 'Rooms type or name es (double,triple,single separated by comma)', 'bookandpay_textdomain' ), 
+	add_meta_box( 'bookandpay_room', __( 'Rooms type or name es (double,triple,single separated by comma)', 'bookandpay' ), 
 		                'bookandpay_inner_room_box', 'page', 'normal','high' );
-	add_meta_box( 'bookandpay_room', __( 'Rooms type or name es (double,triple,single separated by comma)', 'bookandpay_textdomain' ), 
+	add_meta_box( 'bookandpay_room', __( 'Rooms type or name es (double,triple,single separated by comma)', 'bookandpay' ), 
 		                'bookandpay_inner_room_box', 'accommodations', 'normal','high' );
 
-	add_meta_box( 'bookandpay_room', __( 'Rooms type or name es (double,triple,single separated by comma)', 'bookandpay_textdomain' ), 
+	add_meta_box( 'bookandpay_room', __( 'Rooms type or name es (double,triple,single separated by comma)', 'bookandpay' ), 
 		                'bookandpay_inner_room_box', 'italy', 'normal','high' );
 
-    /*add_meta_box( 'bookandpay_sectionb', __( 'My Post Section Title', 'bookandpay_textdomain' ), 
+    /*add_meta_box( 'bookandpay_sectionb', __( 'My Post Section Title', 'bookandpay' ), 
                 'bookandpay_inner_room_box', 'post', 'advanced' );
                 */
    } else {
@@ -674,26 +694,44 @@ function bookandpay_inner_custom_box() {
 
   // The actual fields for data entry
 
-  echo '<p><label for="bookandpay_emailowner">' . __("Email", 'bookandpay_textdomain' ) . '</label></p>';
+	echo '<p><label for="bookandpay_enabled">' . __("Enable Booking form", 'bookandpay' ) . '?</label></p>';
+	echo '<p><select name="bookandpay_enabled">
+			<option selected="selected" value="'.get_post_meta($_GET['post'],'bookandpay_enabled',TRUE).'">'.get_post_meta($_GET['post'],'bookandpay_enabled',true).'</option>
+			<option value="on">on</option>
+			<option value="off">off</option>';
+	echo '</select>
+		 </p>';
+
+echo '<p><label for="bookandpay_instant_booking">' . __("Enable Instant Booking", 'bookandpay' ) . '?</label></p>';
+echo '<p><select name="bookandpay_instant_booking">
+		<option selected="selected" value="'.get_post_meta($_GET['post'],'bookandpay_instant_booking',TRUE).'">'.get_post_meta($_GET['post'],'bookandpay_instant_booking',true).'</option>
+		<option value="on">on</option>
+		<option value="off">off</option>';
+echo '</select>
+	 </p>';
+
+  echo '<p><label for="bookandpay_emailowner">' . __("Owner email", 'bookandpay' ) . '</label></p>';
   echo '<input type="text" name="bookandpay_emailowner" value="'.get_post_meta($_GET['post'], 'bookandpay_emailowner', TRUE).'" size="25" />';
 
-  echo '<br /><p><label for="bookandpay_owner_phone">' . __("Owner address", 'bookandpay_textdomain' ) . '</label></p>';
+  echo '<br /><p><label for="bookandpay_owner_phone">' . __("Owner address", 'bookandpay' ) . '</label></p>';
   echo '<input type="text" name="bookandpay_owner_phone" value="'.get_post_meta($_GET['post'], 'bookandpay_owner_phone', TRUE).'" size="25" />';
 
-  echo '<br /><p><label for="bookandpay_owner_address">' . __("exact Address", 'bookandpay_textdomain' ) . '</label></p>';
+  echo '<br /><p><label for="bookandpay_owner_address">' . __("exact Address", 'bookandpay' ) . '</label></p>';
   echo '<input type="text" name="bookandpay_owner_address" value="'.get_post_meta($_GET['post'], 'bookandpay_owner_address', TRUE).'" size="25" />';
 
-  echo '<br /><p><label for="bookandpay_owner_notes">' . __("Owner Notes", 'bookandpay_textdomain' ) . '</label></p>';
+  echo '<br /><p><label for="bookandpay_owner_notes">' . __("Owner Notes", 'bookandpay' ) . '</label></p>';
   echo '<input type="text" name="bookandpay_owner_notes" value="'.get_post_meta($_GET['post'], 'bookandpay_owner_notes', TRUE).'" size="25" />';
 
-  echo '<br /><p><label for="bookandpay_owner_truename">' . __("Apartment real name", 'bookandpay_textdomain' ) . '</label></p>';
+  echo '<br /><p><label for="bookandpay_owner_truename">' . __("Apartment real name", 'bookandpay' ) . '</label></p>';
   echo '<input type="text" name="bookandpay_owner_truename" value="'.get_post_meta($_GET['post'], 'bookandpay_owner_truename', TRUE).'" size="25" />';
   
-    echo '<br /><p><label for="bookandpay_maxpeople">' . __("Max pax", 'bookandpay_textdomain' ) . '</label></p>';
+    echo '<br /><p><label for="bookandpay_maxpeople">' . __("Max pax", 'bookandpay' ) . '</label></p>';
   echo '<input type="text" name="bookandpay_maxpeople" value="'.get_post_meta($_GET['post'], 'bookandpay_maxpeople', TRUE).'" size="25" />';
 
 
  }
+ 
+ 
  
  /* Prints the inner fields for the custom post/page section */
 function bookandpay_inner_room_box() {
@@ -705,9 +743,11 @@ function bookandpay_inner_room_box() {
 
   // The actual fields for data entry
 
-  echo '<label for="bookandpay_room">' . __("rooms", 'bookandpay_textdomain' ) . '</label> ';
+  echo '<label for="bookandpay_room">' . __("rooms", 'bookandpay' ) . '</label> ';
   echo '<input type="text" name="bookandpay_room" value="'.get_post_meta($_GET['post'], 'bookandpay_room', TRUE).'" size="50" />';
  }
+ 
+ 
 
 /* Prints the edit form for pre-WordPress 2.5 post/page */
 function bookandpay_old_custom_box() {
@@ -715,7 +755,7 @@ function bookandpay_old_custom_box() {
   echo '<div class="dbx-b-ox-wrapper">' . "\n";
   echo '<fieldset id="bookandpay_fieldsetid" class="dbx-box">' . "\n";
   echo '<div class="dbx-h-andle-wrapper"><h3 class="dbx-handle">' . 
-        __( 'My Post Section Title', 'bookandpay_textdomain' ) . "</h3></div>";   
+        __( 'My Post Section Title', 'bookandpay' ) . "</h3></div>";   
    
   echo '<div class="dbx-c-ontent-wrapper"><div class="dbx-content">';
 
@@ -757,6 +797,8 @@ function bookandpay_save_postdata( $post_id ) {
 
 
   
+  update_post_meta($_POST['ID'], 'bookandpay_instant_booking',$_POST['bookandpay_instant_booking']);
+  update_post_meta($_POST['ID'], 'bookandpay_enabled',$_POST['bookandpay_enabled']);
   update_post_meta($_POST['ID'], 'bookandpay_emailowner',$_POST['bookandpay_emailowner']);
   update_post_meta($_POST['ID'], 'bookandpay_room',$_POST['bookandpay_room']);
   

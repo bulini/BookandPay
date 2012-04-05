@@ -20,7 +20,7 @@ setcookie("bookandpay_people", $_POST['people'], time()+3600, "/", str_replace('
 
 $booking = new Booking();
 
-$booking->NewRequest();
+$booking->NewRequest(ICL_LANGUAGE_CODE);
 
 
 

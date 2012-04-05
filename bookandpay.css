@@ -88,7 +88,16 @@ clear: left;
 .available {
     color: #000;
     background-color: #DFF2BF;
-    font-size: 110%;
+    display: block;
+    font-size: 80%;
+}
+
+.instant {
+	background: #7FAE00;
+}
+
+.owner {
+	background: #E91C21;
 }
 
 
